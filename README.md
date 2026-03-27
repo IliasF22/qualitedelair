@@ -1,5 +1,7 @@
 # Station qualité de l’air — ESIEE
 
+Détection de qualité de l’air — projet ESIEE-IT.
+
 Interface web (React + Vite) et API Node (Express + Socket.io) pour afficher les mesures des capteurs :
 
 - **Grove Air Quality Sensor v1.3** — indice / qualité perçue  

@@ -1,0 +1,14 @@
+{
+  "name": "esiee-air-quality-web",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "NODE_ENV=production npm run start --prefix server",
+    "deploy:netlify": "npm run build && npx --yes netlify-cli deploy --dir=client/dist --prod"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

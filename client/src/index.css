@@ -1,0 +1,48 @@
+:root {
+  --bg: #0a0a0c;
+  --surface: #12121a;
+  --surface-2: #1a1a24;
+  --border: rgba(55, 196, 239, 0.18);
+  --text: #edecef;
+  --muted: #9aa0b4;
+  --cyan: #37c4ef;
+  --purple: #5d2a8e;
+  --indigo: #5c43a0;
+  --blue: #4a7dc0;
+  --gradient: linear-gradient(90deg, #4e1b73 0%, #5c43a0 35%, #4a7dc0 70%, #37c4ef 100%);
+  --radius: 14px;
+  --font: "DM Sans", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}

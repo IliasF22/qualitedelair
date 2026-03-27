@@ -1,0 +1,20 @@
+# Déploiement Netlify : site statique (React). L’API Node doit être hébergée ailleurs (Render, Fly.io, etc.).
+# Netlify → Site settings → Environment variables : VITE_BACKEND_URL = https://ton-api.onrender.com (sans slash final).
+
+[build]
+  command = "npm install && npm run build --prefix client"
+  publish = "client/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# React Router : éviter le 404 au rafraîchissement sur /historique
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

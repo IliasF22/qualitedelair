@@ -2,7 +2,7 @@
 # Netlify → Site settings → Environment variables : VITE_BACKEND_URL = https://ton-api.onrender.com (sans slash final).
 
 [build]
-  command = "npm install && npm run build --prefix client"
+  command = "npm install && npm run build"
   publish = "client/dist"
 
 [build.environment]

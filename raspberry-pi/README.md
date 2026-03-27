@@ -1,4 +1,6 @@
-# Raspberry Pi — envoi des mesures
+# Raspberry Pi — envoi des mesures vers le site
+
+Les données partent en **`POST /api/sensor`** sur l’URL configurée (ex. **`https://qualitedelair.onrender.com`**).
 
 ## Installation
 
@@ -9,24 +11,38 @@ cd raspberry-pi
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
+nano .env   # renseigner au minimum API_URL (et SENSOR_API_KEY si tu l’utilises sur Render)
 ```
 
-## Configuration
+## Configuration (fichier `.env`)
 
-Copier `.env.example` vers `.env` ou exporter les variables :
+Le script charge automatiquement **`raspberry-pi/.env`** s’il existe.
 
 | Variable | Description |
 |----------|-------------|
-| `API_URL` | URL HTTPS du serveur Node (ex. `https://ton-service.onrender.com`) |
-| `SENSOR_API_KEY` | Identique à `SENSOR_API_KEY` sur le serveur (si tu l’as activée) |
+| `API_URL` | URL HTTPS **sans** `/` final (ex. `https://qualitedelair.onrender.com`) |
+| `SENSOR_API_KEY` | Même valeur que sur Render si tu as défini `SENSOR_API_KEY` |
 | `INTERVAL_SEC` | Secondes entre deux envois (défaut `5`) |
-| `MOCK_MODE` | `1` = données factices pour tester sans capteurs |
+| `MOCK_MODE` | `1` = données simulées (recommandé pour tester sans capteurs) |
+
+## Lancer
 
 ```bash
-export API_URL="https://ton-api.onrender.com"
+source .venv/bin/activate
+python3 pi_sensor_sender.py              # envoi en boucle
+python3 pi_sensor_sender.py --once       # un seul test puis arrêt
+```
+
+Ou : `chmod +x run.sh && ./run.sh`
+
+Sans fichier `.env`, tu peux exporter les variables :
+
+```bash
+export API_URL="https://qualitedelair.onrender.com"
 export SENSOR_API_KEY="ta-cle-secrete"
 export INTERVAL_SEC=5
-export MOCK_MODE=0
+export MOCK_MODE=1
 python3 pi_sensor_sender.py
 ```
 

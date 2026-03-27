@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """
-Envoie les mesures capteurs vers l'API distante (POST /api/sensor).
+Envoie les mesures des capteurs vers ton site (POST /api/sensor).
 
-Matériel visé : Raspberry Pi + Grove Air Quality v1.3, DHT11, Grove CO2, HM2201 (PM).
-Les lectures réelles dépendent du câblage et des libs (Seeed / Adafruit / UART).
-Sans capteurs : définir MOCK_MODE=1 pour tester la chaîne jusqu'au serveur.
+URL typique : https://qualitedelair.onrender.com
 
-Variables d'environnement :
-  API_URL          URL du serveur (ex. https://xxx.onrender.com) — sans slash final
-  SENSOR_API_KEY   Même clé que sur le serveur (header X-API-Key), si configurée
+Variables (fichier .env à côté de ce script, ou export dans le shell) :
+  API_URL          URL HTTPS sans slash final (obligatoire)
+  SENSOR_API_KEY   Même valeur que sur Render (variable SENSOR_API_KEY), si tu l’as définie
   INTERVAL_SEC     Intervalle entre envois (défaut 5)
-  MOCK_MODE        1 = données factices (défaut 0)
+  MOCK_MODE        1 = données simulées (test sans matériel)
+
+Usage :
+  python3 pi_sensor_sender.py              # boucle infinie
+  python3 pi_sensor_sender.py --once       # un seul envoi
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
@@ -26,11 +29,30 @@ from typing import Any, Dict
 import requests
 
 # ---------------------------------------------------------------------------
-# À brancher : imports optionnels selon ton installation (décommenter au besoin)
+# Imports optionnels selon ton matériel (décommenter après pip install)
 # ---------------------------------------------------------------------------
-# import Adafruit_DHT  # pip install Adafruit-DHT (DHT11)
-# import board, busio  # circuitpython / grove
-# import serial  # pip install pyserial — HM2201 souvent UART
+# import Adafruit_DHT  # DHT11
+# import serial  # HM2201 UART
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def load_env_file(path: str) -> None:
+    """Charge KEY=VALUE dans os.environ si la clé n’est pas déjà définie."""
+    if not os.path.isfile(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                continue
+            key, _, val = line.partition("=")
+            key = key.strip()
+            val = val.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = val
 
 
 def _env_float(name: str, default: float) -> float:
@@ -43,15 +65,11 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
-def _env_int(name: str, default: int) -> int:
-    return int(_env_float(name, float(default)))
-
-
 def read_dht11() -> tuple[float | None, float | None]:
-    """Retourne (température °C, humidité %). None si non branché."""
-    # Exemple Adafruit_DHT (à adapter pin BCM) :
-    # sensor = Adafruit_DHT.DHT11
-    # pin = 4
+    """Température °C, humidité %. None si non branché."""
+    # Exemple Adafruit_DHT (adapter le pin BCM) :
+    # import Adafruit_DHT
+    # sensor, pin = Adafruit_DHT.DHT11, 4
     # h, t = Adafruit_DHT.read_retry(sensor, pin)
     # if h is not None and t is not None:
     #     return float(t), float(h)
@@ -59,23 +77,21 @@ def read_dht11() -> tuple[float | None, float | None]:
 
 
 def read_grove_air_quality_index() -> int | None:
-    """Indice 0–500+ selon ton driver Grove Air Quality v1.3 (ADC / bus)."""
-    # Exemple : lecture ADC puis mapping fabricant → indice
+    """Indice qualité air (Grove Air Quality v1.3)."""
     return None
 
 
 def read_grove_co2_ppm() -> float | None:
-    """CO2 en ppm (Grove — souvent UART ou modulation)."""
+    """CO₂ ppm."""
     return None
 
 
 def read_hm2201_pm() -> tuple[float | None, float | None, float | None]:
-    """PM1, PM2.5, PM10 en µg/m³ (HM2201 — souvent trame série)."""
+    """PM1, PM2.5, PM10 en µg/m³."""
     return None, None, None
 
 
 def mock_payload(t: float) -> Dict[str, Any]:
-    """Données de test (même esprit que le mock Node)."""
     base = 420 + math.sin(t / 60.0) * 80
     aqi = int(round(45 + math.sin(t / 45.0) * 25 + (random.random() - 0.5) * 8))
     return {
@@ -90,7 +106,7 @@ def mock_payload(t: float) -> Dict[str, Any]:
 
 
 def build_payload() -> Dict[str, Any]:
-    mock = os.environ.get("MOCK_MODE", "0").strip() in ("1", "true", "yes")
+    mock = os.environ.get("MOCK_MODE", "0").strip().lower() in ("1", "true", "yes", "on")
     if mock:
         return mock_payload(time.time())
 
@@ -99,7 +115,6 @@ def build_payload() -> Dict[str, Any]:
     co2 = read_grove_co2_ppm()
     pm1, pm25, pm10 = read_hm2201_pm()
 
-    # Valeurs de repli si capteurs pas encore câblés (évite POST vide)
     if temp is None:
         temp = 21.0
     if rh is None:
@@ -131,13 +146,64 @@ def post_sensor(api_url: str, api_key: str | None, payload: Dict[str, Any]) -> r
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["X-API-Key"] = api_key
-    return requests.post(url, data=json.dumps(payload), headers=headers, timeout=30)
+    return requests.post(url, json=payload, headers=headers, timeout=45)
+
+
+def check_health(api_url: str) -> bool:
+    url = f"{api_url.rstrip('/')}/api/health"
+    try:
+        r = requests.get(url, timeout=15)
+        return r.ok
+    except requests.RequestException:
+        return False
+
+
+def run_loop(api_url: str, api_key: str | None, interval: float, once: bool) -> int:
+    if not check_health(api_url):
+        print(
+            "[pi_sensor_sender] Avertissement : /api/health ne répond pas (vérifie l’URL ou attends le réveil Render).",
+            file=sys.stderr,
+        )
+
+    print(
+        f"[pi_sensor_sender] Cible={api_url}  interval={interval}s  "
+        f"MOCK_MODE={os.environ.get('MOCK_MODE', '0')}  --once={once}"
+    )
+
+    while True:
+        r: requests.Response | None = None
+        try:
+            body = build_payload()
+            r = post_sensor(api_url, api_key, body)
+            if r.ok:
+                print(f"OK {r.status_code} — {json.dumps(body, ensure_ascii=False)}")
+            else:
+                print(f"HTTP {r.status_code}: {r.text[:500]}", file=sys.stderr)
+        except requests.RequestException as e:
+            print(f"Erreur réseau : {e}", file=sys.stderr)
+
+        if once:
+            if r is not None:
+                return 0 if r.ok else 1
+            return 1
+
+        time.sleep(interval)
 
 
 def main() -> int:
+    load_env_file(os.path.join(_SCRIPT_DIR, ".env"))
+
+    parser = argparse.ArgumentParser(description="Envoie les mesures vers POST /api/sensor")
+    parser.add_argument("--once", action="store_true", help="Un seul envoi puis quitte")
+    args = parser.parse_args()
+
     api_url = os.environ.get("API_URL", "").strip()
     if not api_url:
-        print("Erreur : définir API_URL (ex. https://ton-api.onrender.com)", file=sys.stderr)
+        print(
+            "Erreur : définir API_URL dans .env ou l’environnement "
+            "(ex. https://qualitedelair.onrender.com)",
+            file=sys.stderr,
+        )
         return 1
 
     api_key = os.environ.get("SENSOR_API_KEY", "").strip() or None
@@ -145,20 +211,11 @@ def main() -> int:
     if interval < 1.0:
         interval = 1.0
 
-    print(f"[pi_sensor_sender] API_URL={api_url} interval={interval}s MOCK_MODE={os.environ.get('MOCK_MODE', '0')}")
-
-    while True:
-        try:
-            body = build_payload()
-            r = post_sensor(api_url, api_key, body)
-            if r.ok:
-                print(f"OK {r.status_code} — {body}")
-            else:
-                print(f"Erreur HTTP {r.status_code}: {r.text[:500]}", file=sys.stderr)
-        except requests.RequestException as e:
-            print(f"Erreur réseau : {e}", file=sys.stderr)
-
-        time.sleep(interval)
+    try:
+        return run_loop(api_url, api_key, interval, args.once)
+    except KeyboardInterrupt:
+        print("\n[pi_sensor_sender] Arrêt.")
+        return 0
 
 
 if __name__ == "__main__":

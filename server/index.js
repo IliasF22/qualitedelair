@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Server } from "socket.io";
@@ -120,13 +121,29 @@ app.post("/api/sensor", sensorAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-/** Site React (build Vite) servi par le même processus — un seul hébergeur (ex. Render), pas de Netlify obligatoire. */
-if (process.env.SERVE_STATIC === "1" || process.env.SERVE_STATIC === "true") {
-  const staticDir = path.join(__dirname, "..", "client", "dist");
+/** Site React (build Vite) — même processus que l’API (Render, etc.). */
+const staticDir = path.join(__dirname, "..", "client", "dist");
+const staticIndexHtml = path.join(staticDir, "index.html");
+
+function shouldServeStatic() {
+  if (process.env.SERVE_STATIC === "0" || process.env.SERVE_STATIC === "false") {
+    return false;
+  }
+  if (process.env.SERVE_STATIC === "1" || process.env.SERVE_STATIC === "true") {
+    return true;
+  }
+  /* Prod sans variable explicite (ex. Render : oubli de SERVE_STATIC=1) */
+  if (process.env.NODE_ENV === "production" && fs.existsSync(staticIndexHtml)) {
+    return true;
+  }
+  return false;
+}
+
+if (shouldServeStatic()) {
   app.use(express.static(staticDir));
   app.get("*", (req, res, next) => {
     if (req.path.startsWith("/api")) return next();
-    res.sendFile(path.join(staticDir, "index.html"));
+    res.sendFile(staticIndexHtml);
   });
 }
 
@@ -164,6 +181,9 @@ startMockStream();
 
 httpServer.listen(PORT, () => {
   console.log(`[air-quality] API + WebSocket port ${PORT}`);
+  if (shouldServeStatic()) {
+    console.log(`[air-quality] Fichiers statiques: ${staticDir}`);
+  }
   if (process.env.SENSOR_API_KEY) console.log("[air-quality] SENSOR_API_KEY activé (POST /api/sensor protégé)");
   if (process.env.DISABLE_MOCK === "1" || process.env.DISABLE_MOCK === "true") {
     console.log("[air-quality] Mock désactivé — envoyer des données depuis le Raspberry Pi");

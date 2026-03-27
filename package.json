@@ -5,7 +5,7 @@
     "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
     "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
-    "start": "NODE_ENV=production npm run start --prefix server",
+    "start": "SERVE_STATIC=1 NODE_ENV=production npm run start --prefix server",
     "deploy:netlify": "npm run build && npx --yes netlify-cli deploy --dir=client/dist --prod"
   },
   "devDependencies": {

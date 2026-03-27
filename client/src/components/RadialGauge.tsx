@@ -161,7 +161,11 @@ export function RadialGauge({
         </svg>
       </div>
       <div className="radial-gauge__center-readout">
-        <span className="radial-gauge__center-value">{centerText}</span>
+        <span
+          className={`radial-gauge__center-value radial-gauge__center-value--${alertLevel}`}
+        >
+          {centerText}
+        </span>
         <span className="radial-gauge__center-unit">{unit}</span>
       </div>
       <div className={`radial-gauge__badge radial-gauge__badge--${alertLevel}`}>

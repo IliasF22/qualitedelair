@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HistoryPage } from "./pages/HistoryPage";
+import { ThresholdsPage } from "./pages/ThresholdsPage";
 import "./App.css";
 
 export default function App() {
@@ -29,6 +30,9 @@ export default function App() {
           <NavLink to="/historique" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
             Historique
           </NavLink>
+          <NavLink to="/seuils" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
+            Seuils &amp; repères
+          </NavLink>
         </nav>
       </header>
 
@@ -36,11 +40,15 @@ export default function App() {
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/historique" element={<HistoryPage />} />
+          <Route path="/seuils" element={<ThresholdsPage />} />
         </Routes>
       </main>
 
       <footer className="footer">
-        <span>Mode local — données simulées pour le développement. Branchement Raspberry Pi à venir.</span>
+        <span>
+          Choisis la source des mesures sur le dashboard (simulation ou Raspberry Pi). Seuils expliqués dans l’onglet
+          « Seuils &amp; repères ».
+        </span>
       </footer>
     </div>
   );

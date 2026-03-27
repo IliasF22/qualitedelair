@@ -73,3 +73,33 @@
   width: 100%;
   min-height: 280px;
 }
+
+.series-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.65rem;
+  align-items: center;
+}
+
+.series-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.series-toggle input {
+  accent-color: var(--cyan);
+  cursor: pointer;
+}
+
+.series-toggle__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}

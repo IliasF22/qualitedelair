@@ -73,10 +73,19 @@
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+}
+
+/* Bon = vert, attention = ambre, mauvais = rouge */
+.radial-gauge__center-value--ok {
+  color: #22c55e;
+}
+
+.radial-gauge__center-value--warn {
+  color: #f59e0b;
+}
+
+.radial-gauge__center-value--danger {
+  color: #ef4444;
 }
 
 .radial-gauge__unit {

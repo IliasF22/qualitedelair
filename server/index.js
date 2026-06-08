@@ -36,6 +36,8 @@ const corsOrigin = parseOrigins();
 
 /** @type {SensorSnapshot[]} */
 const history = [];
+let lastSnapshot = null;
+let lastHistoryPush = 0;
 
 function labelFromAqi(index) {
   if (index <= 50) return "Excellent";
@@ -115,6 +117,7 @@ app.post("/api/sensor", sensorAuth, (req, res) => {
     pm10: num(body, "pm10"),
     source: "device",
   };
+  lastSnapshot = snapshot;
   pushHistory(snapshot);
   io.emit("sensor:update", snapshot);
   res.json({ ok: true });
@@ -131,8 +134,13 @@ if (process.env.SERVE_STATIC === "1" || process.env.SERVE_STATIC === "true") {
 }
 
 function pushHistory(s) {
-  history.push(s);
-  while (history.length > HISTORY_MAX) history.shift();
+  const now = Date.now();
+  // On ne sauvegarde dans l'historique qu'une fois par minute (60000 ms)
+  if (now - lastHistoryPush >= 60000 || history.length === 0) {
+    history.push(s);
+    while (history.length > HISTORY_MAX) history.shift();
+    lastHistoryPush = now;
+  }
 }
 
 const httpServer = createServer(app);
@@ -156,8 +164,7 @@ function startMockStream() {
 }
 
 io.on("connection", (socket) => {
-  const last = history[history.length - 1];
-  if (last) socket.emit("sensor:update", last);
+  if (lastSnapshot) socket.emit("sensor:update", lastSnapshot);
 });
 
 startMockStream();

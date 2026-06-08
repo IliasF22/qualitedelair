@@ -42,7 +42,7 @@ except Exception as e:
 
 try:
     import serial
-    ser_co2 = serial.Serial('/dev/serial0', 9600, timeout=2)
+    ser_co2 = serial.Serial('/dev/serial0', 9600, timeout=0.2)
 except Exception as e:
     print(f"Attention: Impossible d'initialiser CO2 (serial0): {e}")
     ser_co2 = None

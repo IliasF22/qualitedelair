@@ -32,6 +32,13 @@ import requests
 # import board, busio  # circuitpython / grove
 # import serial  # pip install pyserial — HM2201 souvent UART
 
+try:
+    import smbus2
+    bus = smbus2.SMBus(1)
+except Exception as e:
+    print(f"Attention: Impossible d'initialiser I2C (smbus2): {e}")
+    bus = None
+
 
 def _env_float(name: str, default: float) -> float:
     raw = os.environ.get(name)
@@ -70,8 +77,22 @@ def read_grove_co2_ppm() -> float | None:
 
 
 def read_hm2201_pm() -> tuple[float | None, float | None, float | None]:
-    """PM1, PM2.5, PM10 en µg/m³ (HM2201 — souvent trame série)."""
-    return None, None, None
+    """PM1, PM2.5, PM10 en µg/m³ (HM3301 via I2C)."""
+    if bus is None:
+        return None, None, None
+    try:
+        data = bus.read_i2c_block_data(0x40, 0x88, 29)
+        checksum = sum(data[:28]) & 0xFF
+        if checksum != data[28]:
+            return None, None, None
+            
+        pm1_0 = (data[4] << 8) | data[5]
+        pm2_5 = (data[6] << 8) | data[7]
+        pm10  = (data[8] << 8) | data[9]
+        
+        return pm1_0, pm2_5, pm10
+    except Exception as e:
+        return None, None, None
 
 
 def mock_payload(t: float) -> Dict[str, Any]:

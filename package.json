@@ -6,7 +6,8 @@
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
     "build": "npm run build --prefix client",
     "start": "NODE_ENV=production npm run start --prefix server",
-    "deploy:netlify": "npm run build && npx --yes netlify-cli deploy --dir=client/dist --prod"
+    "deploy:netlify": "npm run build && npx --yes netlify-cli deploy --dir=client/dist --prod",
+    "postinstall": "npm install --prefix server && npm install --prefix client"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

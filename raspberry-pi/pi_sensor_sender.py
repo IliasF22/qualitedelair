@@ -33,6 +33,28 @@ import requests
 # import serial  # pip install pyserial — HM2201 souvent UART
 
 try:
+    import board
+    import adafruit_dht
+    dht_device = adafruit_dht.DHT11(board.D4)
+except Exception as e:
+    print(f"Attention: Impossible d'initialiser DHT11: {e}")
+    dht_device = None
+
+try:
+    import serial
+    ser_co2 = serial.Serial('/dev/serial0', 9600, timeout=2)
+except Exception as e:
+    print(f"Attention: Impossible d'initialiser CO2 (serial0): {e}")
+    ser_co2 = None
+
+try:
+    from grove.grove_air_quality_sensor_v1_3 import GroveAirQualitySensor
+    grove_aq_sensor = GroveAirQualitySensor(0)
+except Exception as e:
+    print(f"Attention: Impossible d'initialiser Grove Air Quality (A0): {e}")
+    grove_aq_sensor = None
+
+try:
     import smbus2
     bus = smbus2.SMBus(1)
 except Exception as e:
@@ -56,23 +78,48 @@ def _env_int(name: str, default: int) -> int:
 
 def read_dht11() -> tuple[float | None, float | None]:
     """Retourne (température °C, humidité %). None si non branché."""
-    # Exemple Adafruit_DHT (à adapter pin BCM) :
-    # sensor = Adafruit_DHT.DHT11
-    # pin = 4
-    # h, t = Adafruit_DHT.read_retry(sensor, pin)
-    # if h is not None and t is not None:
-    #     return float(t), float(h)
+    if dht_device is None:
+        return None, None
+    try:
+        t = dht_device.temperature
+        h = dht_device.humidity
+        if t is not None and h is not None:
+            return float(t), float(h)
+    except RuntimeError:
+        # DHT11 rate souvent des lectures (timing)
+        pass
+    except Exception as e:
+        print(f"Erreur lecture DHT11: {e}")
     return None, None
 
 
 def read_grove_air_quality_index() -> int | None:
     """Indice 0–500+ selon ton driver Grove Air Quality v1.3 (ADC / bus)."""
-    # Exemple : lecture ADC puis mapping fabricant → indice
+    if grove_aq_sensor is None:
+        return None
+    try:
+        val = grove_aq_sensor.value
+        if val is not None:
+            return int(val)
+    except Exception as e:
+        print(f"Erreur lecture Grove AQ: {e}")
     return None
 
 
 def read_grove_co2_ppm() -> float | None:
     """CO2 en ppm (Grove — souvent UART ou modulation)."""
+    if ser_co2 is None:
+        return None
+    try:
+        cmd = b'\xff\x01\x86\x00\x00\x00\x00\x00\x79'
+        ser_co2.reset_input_buffer()
+        ser_co2.write(cmd)
+        result = ser_co2.read(9)
+        if len(result) == 9 and result[0] == 0xff and result[1] == 0x86:
+            ppm = result[2] * 256 + result[3]
+            return float(ppm)
+    except Exception as e:
+        print(f"Erreur lecture CO2: {e}")
     return None
 
 

@@ -1,0 +1,49 @@
+.dashboard-alerts {
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.dashboard-alerts--ok {
+  border-color: rgba(55, 196, 239, 0.3);
+  background: rgba(55, 196, 239, 0.06);
+}
+
+.dashboard-alerts__title {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.45rem;
+}
+
+.dashboard-alerts__msg {
+  font-size: 0.88rem;
+  color: var(--cyan);
+}
+
+.dashboard-alerts__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.dashboard-alerts__item {
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-alerts__item--danger {
+  color: #fca5a5;
+}
+
+.dashboard-alerts__item--warn {
+  color: #fcd34d;
+}
+
+.dashboard-alerts__item strong {
+  font-weight: 600;
+}

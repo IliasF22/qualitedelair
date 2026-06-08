@@ -1,0 +1,136 @@
+.radial-gauge {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1rem 0.9rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.radial-gauge__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.radial-gauge__svg-wrap {
+  display: flex;
+  justify-content: center;
+  margin: -4px 0 -8px;
+}
+
+.radial-gauge__svg {
+  overflow: visible;
+}
+
+.radial-gauge__track {
+  stroke: #2a2a32;
+}
+
+.radial-gauge__value-arc {
+  transition: stroke 0.35s ease, d 0.2s ease;
+}
+
+.radial-gauge__tick {
+  fill: #f0f0f5;
+  font-size: 10px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.radial-gauge__tick--dim {
+  fill: #6b6b78;
+}
+
+.radial-gauge__needle {
+  fill: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+
+.radial-gauge__hub {
+  fill: #ffffff;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+}
+
+.radial-gauge__center-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: -6px;
+  margin-bottom: 0.35rem;
+}
+
+.radial-gauge__center-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.radial-gauge__unit {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.radial-gauge__center-unit {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.radial-gauge__badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  margin-bottom: 0.5rem;
+  border: 1px solid transparent;
+}
+
+.radial-gauge__badge--ok {
+  color: var(--cyan);
+  border-color: rgba(55, 196, 239, 0.4);
+  background: rgba(55, 196, 239, 0.08);
+}
+
+.radial-gauge__badge--warn {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.radial-gauge__badge--danger {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.radial-gauge__legend {
+  margin: 0;
+  padding: 0 0.25rem 0 1.1rem;
+  font-size: 0.65rem;
+  color: var(--muted);
+  line-height: 1.45;
+  align-self: stretch;
+  list-style: disc;
+}
+
+.radial-gauge__legend li {
+  margin-bottom: 0.2rem;
+}
+
+.radial-gauge__legend li:last-child {
+  margin-bottom: 0;
+}

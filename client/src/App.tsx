@@ -17,9 +17,9 @@ export default function App() {
           />
         </div>
         <div className="title-block">
-          <h1 className="app-title">Station qualité de l’air</h1>
+          <h1 className="app-title">Station qualité de l'air</h1>
           <p className="app-subtitle">
-            Grove Air Quality v1.3 · DHT11 · Grove CO₂ · HM2201 (PM)
+            Grove Air Quality v1.3 · DHT11 · Grove CO₂ · HM3301 (PM)
           </p>
         </div>
         <nav className="main-nav" aria-label="Navigation principale">
@@ -40,7 +40,9 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <span>Mode local — données simulées pour le développement. Branchement Raspberry Pi à venir.</span>
+        <span>
+          Station qualité de l'air — Projet ESIEE-IT · Données capteurs Raspberry Pi
+        </span>
       </footer>
     </div>
   );

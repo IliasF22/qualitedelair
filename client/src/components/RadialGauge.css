@@ -1,13 +1,31 @@
 .radial-gauge {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  padding: 1rem 1rem 0.9rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  padding: 1.15rem 1rem 0.9rem;
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.radial-gauge:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(55, 196, 239, 0.2);
+}
+
+.radial-gauge--error {
+  border-color: rgba(248, 113, 113, 0.2);
+  opacity: 0.75;
+}
+
+.radial-gauge--error:hover {
+  border-color: rgba(248, 113, 113, 0.35);
 }
 
 .radial-gauge__title {
@@ -32,32 +50,40 @@
 }
 
 .radial-gauge__track {
-  stroke: #2a2a32;
+  stroke: rgba(55, 196, 239, 0.08);
 }
 
 .radial-gauge__value-arc {
-  transition: stroke 0.35s ease, d 0.2s ease;
+  transition: stroke 0.35s ease, stroke-dasharray 0.5s ease;
 }
 
 .radial-gauge__tick {
-  fill: #f0f0f5;
+  fill: var(--text-secondary);
   font-size: 10px;
   font-weight: 500;
   pointer-events: none;
 }
 
 .radial-gauge__tick--dim {
-  fill: #6b6b78;
+  fill: var(--muted);
+  opacity: 0.5;
 }
 
 .radial-gauge__needle {
   fill: #ffffff;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  transition: transform 0.3s ease;
 }
 
 .radial-gauge__hub {
   fill: #ffffff;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+}
+
+.radial-gauge__error-icon {
+  font-size: 28px;
+  fill: var(--amber);
+  opacity: 0.6;
 }
 
 .radial-gauge__center-readout {
@@ -70,13 +96,19 @@
 }
 
 .radial-gauge__center-value {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: 800;
   letter-spacing: -0.03em;
   background: var(--gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.radial-gauge__center-value--error {
+  background: none;
+  color: var(--muted);
+  font-size: 1.8rem;
 }
 
 .radial-gauge__unit {
@@ -93,28 +125,35 @@
 .radial-gauge__badge {
   font-size: 0.7rem;
   font-weight: 600;
-  padding: 0.2rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
   margin-bottom: 0.5rem;
   border: 1px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .radial-gauge__badge--ok {
-  color: var(--cyan);
-  border-color: rgba(55, 196, 239, 0.4);
-  background: rgba(55, 196, 239, 0.08);
+  color: var(--green);
+  border-color: rgba(52, 211, 153, 0.35);
+  background: var(--green-dim);
 }
 
 .radial-gauge__badge--warn {
-  color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.45);
-  background: rgba(251, 191, 36, 0.1);
+  color: var(--amber);
+  border-color: rgba(251, 191, 36, 0.35);
+  background: var(--amber-dim);
 }
 
 .radial-gauge__badge--danger {
-  color: #f87171;
-  border-color: rgba(248, 113, 113, 0.45);
-  background: rgba(248, 113, 113, 0.1);
+  color: var(--red);
+  border-color: rgba(248, 113, 113, 0.35);
+  background: var(--red-dim);
+}
+
+.radial-gauge__badge--error {
+  color: var(--muted);
+  border-color: rgba(122, 134, 154, 0.3);
+  background: rgba(122, 134, 154, 0.08);
 }
 
 .radial-gauge__legend {

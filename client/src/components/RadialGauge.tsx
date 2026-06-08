@@ -4,23 +4,22 @@ import "./RadialGauge.css";
 
 type RadialGaugeProps = {
   title: string;
-  value: number;
+  value: number | null | undefined;
   unit: string;
   thresholds: MetricThresholds;
   alertLevel: AlertLevel;
   formatCenter?: (v: number) => string;
+  sensorError?: boolean;
 };
 
 const ARC_START = 225;
 const ARC_SWEEP = 270;
-/** Extrémité de l’arc (270° dans le sens horaire depuis ARC_START) */
 const ARC_END = ARC_START - ARC_SWEEP;
 
 function degToRad(d: number) {
   return (d * Math.PI) / 180;
 }
 
-/** 0° = droite ; y SVG vers le bas → y = cy - r·sin(θ) */
 function polar(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = degToRad(angleDeg);
   return {
@@ -29,9 +28,6 @@ function polar(cx: number, cy: number, r: number, angleDeg: number) {
   };
 }
 
-/**
- * Arc d’environ 270° (type compteur). sweep=1 = sens horaire en coordonnées SVG.
- */
 function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg: number, sweep: 0 | 1) {
   const start = polar(cx, cy, r, startDeg);
   const end = polar(cx, cy, r, endDeg);
@@ -48,7 +44,7 @@ function valueToAngle(value: number, min: number, max: number) {
 
 const LEVEL_COLORS: Record<AlertLevel, { arc: string; glow: string }> = {
   ok: { arc: "#37c4ef", glow: "rgba(55, 196, 239, 0.55)" },
-  warn: { arc: "#f59e0b", glow: "rgba(245, 158, 11, 0.5)" },
+  warn: { arc: "#fbbf24", glow: "rgba(251, 191, 36, 0.5)" },
   danger: { arc: "#ef4444", glow: "rgba(239, 68, 68, 0.55)" },
 };
 
@@ -59,13 +55,15 @@ export function RadialGauge({
   thresholds,
   alertLevel,
   formatCenter,
+  sensorError,
 }: RadialGaugeProps) {
   const filterId = useId().replace(/:/g, "");
   const pathRef = useRef<SVGPathElement | null>(null);
   const [arcLen, setArcLen] = useState(0);
 
+  const hasError = sensorError || value == null;
   const { min, max, ticks } = thresholds;
-  const v = Math.min(max, Math.max(min, value));
+  const v = hasError ? min : Math.min(max, Math.max(min, value));
   const t = max === min ? 0 : (v - min) / (max - min);
   const angleNeedle = valueToAngle(v, min, max);
 
@@ -90,13 +88,13 @@ export function RadialGauge({
   const left = polar(cx, cy, 9, angleNeedle + 90);
   const right = polar(cx, cy, 9, angleNeedle - 90);
 
-  const colors = LEVEL_COLORS[alertLevel];
-  const centerText = formatCenter ? formatCenter(v) : String(Math.round(v * 10) / 10);
+  const colors = hasError ? { arc: "#4a5568", glow: "rgba(74, 85, 104, 0.3)" } : LEVEL_COLORS[alertLevel];
+  const centerText = hasError ? "—" : (formatCenter ? formatCenter(v) : String(Math.round(v * 10) / 10));
 
-  const dashVisible = arcLen > 0 ? arcLen * t : 0;
+  const dashVisible = arcLen > 0 ? arcLen * (hasError ? 0 : t) : 0;
 
   return (
-    <div className="radial-gauge">
+    <div className={`radial-gauge ${hasError ? "radial-gauge--error" : ""}`}>
       <h3 className="radial-gauge__title">{title}</h3>
       <div className="radial-gauge__svg-wrap">
         <svg
@@ -133,12 +131,12 @@ export function RadialGauge({
             strokeWidth={stroke}
             strokeLinecap="round"
             strokeDasharray={`${dashVisible} ${arcLen || 1}`}
-            filter={`url(#glow-${filterId})`}
+            filter={hasError ? undefined : `url(#glow-${filterId})`}
           />
 
           {ticks.map((tick) => {
             const p = polar(cx, cy, rInnerLabels, valueToAngle(tick, min, max));
-            const dimmed = tick > v;
+            const dimmed = hasError || tick > v;
             return (
               <text
                 key={tick}
@@ -153,21 +151,40 @@ export function RadialGauge({
             );
           })}
 
-          <polygon
-            className="radial-gauge__needle"
-            points={`${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}`}
-          />
-          <circle className="radial-gauge__hub" cx={cx} cy={cy} r={8} />
+          {!hasError && (
+            <>
+              <polygon
+                className="radial-gauge__needle"
+                points={`${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}`}
+              />
+              <circle className="radial-gauge__hub" cx={cx} cy={cy} r={8} />
+            </>
+          )}
+
+          {hasError && (
+            <text
+              x={cx}
+              y={cy}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="radial-gauge__error-icon"
+            >
+              ⚠
+            </text>
+          )}
         </svg>
       </div>
       <div className="radial-gauge__center-readout">
-        <span className="radial-gauge__center-value">{centerText}</span>
-        <span className="radial-gauge__center-unit">{unit}</span>
+        <span className={`radial-gauge__center-value ${hasError ? "radial-gauge__center-value--error" : ""}`}>
+          {centerText}
+        </span>
+        {!hasError && <span className="radial-gauge__center-unit">{unit}</span>}
       </div>
-      <div className={`radial-gauge__badge radial-gauge__badge--${alertLevel}`}>
-        {alertLevel === "ok" && "Dans les seuils"}
-        {alertLevel === "warn" && "Attention"}
-        {alertLevel === "danger" && "Alerte"}
+      <div className={`radial-gauge__badge radial-gauge__badge--${hasError ? "error" : alertLevel}`}>
+        {hasError && "Capteur indisponible"}
+        {!hasError && alertLevel === "ok" && "Dans les seuils"}
+        {!hasError && alertLevel === "warn" && "Attention"}
+        {!hasError && alertLevel === "danger" && "Alerte"}
       </div>
       <ul className="radial-gauge__legend">
         {thresholds.legend.map((line) => (

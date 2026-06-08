@@ -1,13 +1,16 @@
 .dashboard-alerts {
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
-  border: 1px solid rgba(248, 113, 113, 0.35);
-  background: rgba(248, 113, 113, 0.06);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  background: rgba(248, 113, 113, 0.04);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  animation: fadeIn 0.3s ease;
 }
 
 .dashboard-alerts--ok {
-  border-color: rgba(55, 196, 239, 0.3);
-  background: rgba(55, 196, 239, 0.06);
+  border-color: rgba(52, 211, 153, 0.2);
+  background: rgba(52, 211, 153, 0.04);
 }
 
 .dashboard-alerts__title {
@@ -22,7 +25,7 @@
 
 .dashboard-alerts__msg {
   font-size: 0.88rem;
-  color: var(--cyan);
+  color: var(--green);
 }
 
 .dashboard-alerts__list {

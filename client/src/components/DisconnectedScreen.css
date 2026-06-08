@@ -1,0 +1,130 @@
+.disconnected-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.disconnected-card {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.disconnected-icon {
+  color: var(--red);
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.disconnected-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.disconnected-subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* ── Troubleshoot ── */
+.troubleshoot {
+  text-align: left;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1.25rem 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.troubleshoot-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.troubleshoot-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.troubleshoot-steps li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.troubleshoot-steps li:last-child {
+  border-bottom: none;
+}
+
+.step-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.troubleshoot-steps li div strong {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.15rem;
+}
+
+.troubleshoot-steps li div p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.troubleshoot-steps code {
+  background: rgba(55, 196, 239, 0.1);
+  color: var(--cyan);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+/* ── Hint (pulse) ── */
+.disconnected-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.hint-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@media (max-width: 520px) {
+  .disconnected-card {
+    padding: 1.5rem 1rem;
+  }
+}

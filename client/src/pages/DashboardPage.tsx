@@ -24,8 +24,20 @@ function formatTime(ts: number) {
  * ET que d'autres capteurs fonctionnent, on considère qu'il est en panne.
  * Pour le mode simulation ou appareil, on vérifie juste null/undefined.
  */
-function isSensorFailing(value: number | null | undefined): boolean {
-  return value == null;
+function isSensorFailing(metric: string, value: number | null | undefined): boolean {
+  if (value == null) return true;
+  
+  // Les capteurs défectueux sur le Pi envoient ces valeurs par défaut
+  switch (metric) {
+    case "temperatureC": return value === 21.0;
+    case "humidityPct": return value === 50;
+    case "airQualityIndex": return value === 50;
+    case "co2ppm": return value === 450;
+    case "pm1": return value === 5;
+    case "pm25": return value === 10;
+    case "pm10": return value === 15;
+    default: return false;
+  }
 }
 
 export function DashboardPage() {
@@ -95,7 +107,7 @@ export function DashboardPage() {
             <div className="gauge-grid">
               <RadialGauge
                 title="Indice qualité · Grove Air v1.3"
-                value={isSensorFailing(snapshot.airQualityIndex) ? null : snapshot.airQualityIndex}
+                value={isSensorFailing("airQualityIndex", snapshot.airQualityIndex) ? null : snapshot.airQualityIndex}
                 unit="pts"
                 thresholds={THRESHOLDS.airQualityIndex}
                 alertLevel={alertLevelForMetric("airQualityIndex", snapshot.airQualityIndex ?? 0)}
@@ -103,7 +115,7 @@ export function DashboardPage() {
               />
               <RadialGauge
                 title="CO₂ · Grove"
-                value={isSensorFailing(snapshot.co2ppm) ? null : snapshot.co2ppm}
+                value={isSensorFailing("co2ppm", snapshot.co2ppm) ? null : snapshot.co2ppm}
                 unit="ppm"
                 thresholds={THRESHOLDS.co2ppm}
                 alertLevel={alertLevelForMetric("co2ppm", snapshot.co2ppm ?? 0)}
@@ -111,28 +123,28 @@ export function DashboardPage() {
               />
               <RadialGauge
                 title="PM2.5 · HM3301"
-                value={isSensorFailing(snapshot.pm25) ? null : snapshot.pm25}
+                value={isSensorFailing("pm25", snapshot.pm25) ? null : snapshot.pm25}
                 unit="µg/m³"
                 thresholds={THRESHOLDS.pm25}
                 alertLevel={alertLevelForMetric("pm25", snapshot.pm25 ?? 0)}
               />
               <RadialGauge
                 title="PM10 · HM3301"
-                value={isSensorFailing(snapshot.pm10) ? null : snapshot.pm10}
+                value={isSensorFailing("pm10", snapshot.pm10) ? null : snapshot.pm10}
                 unit="µg/m³"
                 thresholds={THRESHOLDS.pm10}
                 alertLevel={alertLevelForMetric("pm10", snapshot.pm10 ?? 0)}
               />
               <RadialGauge
                 title="Humidité · DHT11"
-                value={isSensorFailing(snapshot.humidityPct) ? null : snapshot.humidityPct}
+                value={isSensorFailing("humidityPct", snapshot.humidityPct) ? null : snapshot.humidityPct}
                 unit="%"
                 thresholds={THRESHOLDS.humidityPct}
                 alertLevel={alertLevelForMetric("humidityPct", snapshot.humidityPct ?? 0)}
               />
               <RadialGauge
                 title="Température · DHT11"
-                value={isSensorFailing(snapshot.temperatureC) ? null : snapshot.temperatureC}
+                value={isSensorFailing("temperatureC", snapshot.temperatureC) ? null : snapshot.temperatureC}
                 unit="°C"
                 thresholds={THRESHOLDS.temperatureC}
                 alertLevel={alertLevelForMetric("temperatureC", snapshot.temperatureC ?? 0)}
@@ -144,7 +156,7 @@ export function DashboardPage() {
           <section className="pm-extra" aria-label="PM1">
             <span className="pm-extra__label">PM1 (HM3301)</span>
             <span className="pm-extra__value">
-              {isSensorFailing(snapshot.pm1) ? "—" : `${snapshot.pm1} µg/m³`}
+              {isSensorFailing("pm1", snapshot.pm1) ? "—" : `${snapshot.pm1} µg/m³`}
             </span>
             <span className="pm-extra__hint">Seuil indicatif PM2.5 : voir jauge ci-dessus</span>
           </section>

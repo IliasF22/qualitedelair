@@ -168,29 +168,14 @@ def build_payload() -> Dict[str, Any]:
     pm1, pm25, pm10 = read_hm2201_pm()
 
     # Valeurs de repli si capteurs pas encore câblés (évite POST vide)
-    if temp is None:
-        temp = 21.0
-    if rh is None:
-        rh = 50.0
-    if aqi is None:
-        aqi = 50
-    if co2 is None:
-        co2 = 450.0
-    if pm1 is None:
-        pm1 = 5.0
-    if pm25 is None:
-        pm25 = 10.0
-    if pm10 is None:
-        pm10 = 15.0
-
     return {
-        "airQualityIndex": int(max(0, min(500, aqi))),
-        "temperatureC": float(temp),
-        "humidityPct": int(max(0, min(100, round(rh)))),
-        "co2ppm": int(max(0, co2)),
-        "pm1": int(max(0, pm1)),
-        "pm25": int(max(0, pm25)),
-        "pm10": int(max(0, pm10)),
+        "airQualityIndex": int(max(0, min(500, aqi))) if aqi is not None else None,
+        "temperatureC": float(temp) if temp is not None else None,
+        "humidityPct": int(max(0, min(100, round(rh)))) if rh is not None else None,
+        "co2ppm": int(max(0, co2)) if co2 is not None else None,
+        "pm1": int(max(0, pm1)) if pm1 is not None else None,
+        "pm25": int(max(0, pm25)) if pm25 is not None else None,
+        "pm10": int(max(0, pm10)) if pm10 is not None else None,
     }
 
 

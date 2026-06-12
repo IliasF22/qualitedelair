@@ -1,9 +1,22 @@
+import { useState, useEffect } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import "./App.css";
 
 export default function App() {
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    return (localStorage.getItem("theme") as "dark" | "light") || "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === "dark" ? "light" : "dark");
+  };
   return (
     <div className="app-shell">
       <header className="top-bar">
@@ -29,6 +42,9 @@ export default function App() {
           <NavLink to="/historique" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
             Historique
           </NavLink>
+          <button className="theme-toggle" onClick={toggleTheme} aria-label="Changer de thème">
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
         </nav>
       </header>
 

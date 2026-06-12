@@ -31,7 +31,7 @@ function isSensorFailing(metric: string, value: number | null | undefined): bool
   switch (metric) {
     case "temperatureC": return value === 21.0;
     case "humidityPct": return value === 50;
-    case "airQualityIndex": return value === 50;
+    case "airQualityIndex": return true; // Toujours désactivé (pas de broche analogique)
     case "co2ppm": return value === 450;
     case "pm1": return value === 5;
     case "pm25": return value === 10;
